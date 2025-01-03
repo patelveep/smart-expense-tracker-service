@@ -70,8 +70,7 @@ public static class ProductEndpoints
             CancellationToken ct,
             DateTime? startDate = null,
             DateTime? endDate = null,
-            int page = 1,
-            int pageSize = 10) =>
+            string? searchText = null) =>
         {
             var query = context.Expenses.AsNoTracking();
 
@@ -88,10 +87,18 @@ public static class ProductEndpoints
                 query = query.Where(expense => expense.Date <= endDate.Value);
             }
 
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var searchPattern = $"%{searchText}%"; // Add wildcards for fuzzy search
+                query = query.Where(expense =>
+                    EF.Functions.Like(expense.Name.ToLower(), searchPattern.ToLower()) ||
+                    EF.Functions.Like(expense.Amount.ToString(), searchPattern) ||
+                    (expense.Category != null && EF.Functions.Like(expense.Category.Name.ToLower(), searchPattern.ToLower())) ||
+                    (expense.Description != null && EF.Functions.Like(expense.Description.ToLower(), searchPattern.ToLower())));
+            }
+
             // Pagination
             var expenses = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
                 .Select(expense => new ListAllExpenseResponseDto
                 {
                     Id = expense.Id,
