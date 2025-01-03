@@ -230,15 +230,26 @@ public static class ProductEndpoints
                     else if (year.HasValue)
                     {
                         // Group by months for the given year
-                        response.GroupedByMonth = await query
-                            .GroupBy(e => e.Date.Month)
-                            .Select(group => new MonthGroupDto
-                            {
-                                Month = group.Key,
-                                TotalAmount = group.Sum(e => e.Amount),
-                                ExpenseCount = group.Count()
-                            })
-                            .ToListAsync();
+                        response.GroupedByMonth = Enumerable.Range(1, 12) // Generate all months (1 to 12)
+                         .GroupJoin(
+                             query.GroupBy(e => e.Date.Month)
+                                  .Select(group => new
+                                  {
+                                      Month = group.Key,
+                                      TotalAmount = group.Sum(e => e.Amount),
+                                      ExpenseCount = group.Count()
+                                  })
+                                  .ToList(), // Ensure this is evaluated in-memory
+                             month => month, // Outer key selector: month number
+                             group => group.Month, // Inner key selector: grouped month
+                             (month, group) => new MonthGroupDto
+                             {
+                                 Month = month,
+                                 TotalAmount = group.FirstOrDefault()?.TotalAmount ?? 0, // Default to 0 if no data
+                                 ExpenseCount = group.FirstOrDefault()?.ExpenseCount ?? 0 // Default to 0 if no data
+                             }
+                         )
+                         .ToList(); // Use ToList() for IEnumerable
                     }
                     else
                     {
