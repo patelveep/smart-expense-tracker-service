@@ -38,3 +38,6 @@ bash
 4. Backend service will be running on ```http://localhost:5000```
 
 5. API documentation is available on ```http://localhost:5000/swagger/index.html```
+
+## Database Schema for the application
+![image (86)](https://github.com/user-attachments/assets/9fec6bb9-0e14-4272-985a-425f0a5ac821)
