@@ -136,7 +136,7 @@ public static class ProductEndpoints
 
             return product is null ? Results.NotFound() : Results.Ok(product);
         });
-        
+
 
         /*app.MapDelete("expenses/{id}", async (
             int id,
@@ -200,13 +200,11 @@ public static class ProductEndpoints
                     }
 
                     // Grouping logic based on input parameters
-                    // Grouping logic
-                    List<object> groupedData;
 
                     if (year.HasValue && month.HasValue)
                     {
                         // Group by specific dates for the given year and month
-                        response.GroupedByDate = await query
+                        response.GroupedByDate = query
                             .GroupBy(e => e.Date.Date)
                             .Select(group => new DateGroupDto
                             {
@@ -214,25 +212,35 @@ public static class ProductEndpoints
                                 TotalAmount = group.Sum(e => e.Amount),
                                 ExpenseCount = group.Count()
                             })
-                            .ToListAsync();
+                            .ToList();
                     }
                     else if (year.HasValue)
                     {
                         // Group by months for the given year
-                        response.GroupedByMonth = await query
-                            .GroupBy(e => e.Date.Month)
-                            .Select(group => new MonthGroupDto
-                            {
-                                Month = group.Key,
-                                TotalAmount = group.Sum(e => e.Amount),
-                                ExpenseCount = group.Count()
-                            })
-                            .ToListAsync();
+                        response.GroupedByMonth = Enumerable.Range(1, 12) // Generate all months (1 to 12)
+                            .GroupJoin(
+                                query.GroupBy(e => e.Date.Month)
+                                     .Select(group => new MonthGroupDto
+                                     {
+                                         Month = group.Key,
+                                         TotalAmount = group.Sum(e => e.Amount),
+                                         ExpenseCount = group.Count()
+                                     }),
+                                month => month, // Outer key selector: month number
+                                group => group.Month, // Inner key selector: grouped month
+                                (month, group) => new MonthGroupDto
+                                {
+                                    Month = month,
+                                    TotalAmount = group.FirstOrDefault()?.TotalAmount ?? 0, // Default to 0 if no data
+                                    ExpenseCount = group.FirstOrDefault()?.ExpenseCount ?? 0 // Default to 0 if no data
+                                }
+                            )
+                            .ToList();
                     }
                     else
                     {
                         // Default: Group by years
-                        response.GroupedByYear = await query
+                        response.GroupedByYear = query
                             .GroupBy(e => e.Date.Year)
                             .Select(group => new YearGroupDto
                             {
@@ -240,7 +248,7 @@ public static class ProductEndpoints
                                 TotalAmount = group.Sum(e => e.Amount),
                                 ExpenseCount = group.Count()
                             })
-                            .ToListAsync();
+                            .ToList();
                     }
 
                     return response;
