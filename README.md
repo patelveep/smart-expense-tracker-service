@@ -17,15 +17,17 @@ A simple web application to help you track and manage your personal expenses. Th
 ### Prerequisites
 
 - Docker
-- MongoDB (locally or through a cloud service like MongoDB Atlas)
+
 
 ### Steps
 
 1. **Clone the repository**:
    
+ ```shell  
 bash
    git clone https://github.com/patelveep/smart-expense-tracker-service
    cd smart-expense-tracker-service
+```
 
 2. Docker must be up and running
 
@@ -33,6 +35,6 @@ bash
     3.a docker compose build
     3.b docker compose up
 
-4. Backend service will be running on http://localhost:5000
+4. Backend service will be running on ```http://localhost:5000```
 
-5. API documentation is available on http://localhost:5000/swagger/index.html
+5. API documentation is available on ```http://localhost:5000/swagger/index.html```
