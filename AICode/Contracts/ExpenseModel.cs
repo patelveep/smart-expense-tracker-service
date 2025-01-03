@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AICode.Contracts
 {
-    public class ListAllExpenseResponseDto
+    public class ExpenseModel
     {
         public int Id { get; set; }
 

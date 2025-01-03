@@ -8,7 +8,7 @@ public class UpdateExpenseRequest
     [Required]
     [MaxLength(200)]
     public string Name { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; }
     [Required]
     public int CategoryId { get; set; }
 
